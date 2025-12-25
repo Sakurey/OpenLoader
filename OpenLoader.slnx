@@ -1,34 +1,35 @@
 <Solution>
-  <Configurations>
-    <Platform Name="Any CPU" />
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
-  <Folder Name="/MSBuild/">
-    <File Path="MSBuild/Robust.Trimming.targets" />
-  </Folder>
-  <Folder Name="/Solution Items/">
-    <File Path=".editorconfig" />
-    <File Path="Directory.Packages.props" />
-    <File Path="Launcher.props" />
-    <File Path="LICENSE" />
-    <File Path="Readme.md" />
-  </Folder>
-  <Folder Name="/Solution Items/Build Scripts/">
-    <File Path="download_net_runtime.py" />
-    <File Path="publish.sh" />
-    <File Path="publish_linux.sh" />
-    <File Path="publish_osx.sh" />
-    <File Path="publish_windows.sh" />
-  </Folder>
-  <Folder Name="/Solution Items/Workflows/">
-    <File Path=".github/workflows/build-test.yml" />
-    <File Path=".github/workflows/publish-release.yml" />
-  </Folder>
-  <Project Path="Marsey.Tests/Marsey.Tests.csproj" />
-  <Project Path="Marsey/Marsey.csproj" />
-  <Project Path="SS14.Launcher.Strap/SS14.Launcher.Strap.csproj" />
-  <Project Path="SS14.Launcher.Tests/SS14.Launcher.Tests.csproj" />
-  <Project Path="SS14.Launcher/SS14.Launcher.csproj" />
-  <Project Path="SS14.Loader/SS14.Loader.csproj" />
+    <Configurations>
+        <Platform Name="Any CPU" />
+        <Platform Name="x64" />
+        <Platform Name="x86" />
+    </Configurations>
+    <Folder Name="/MSBuild/">
+        <File Path="MSBuild/Robust.Trimming.targets" />
+    </Folder>
+    <Folder Name="/Solution Items/">
+        <File Path=".editorconfig" />
+        <File Path="Directory.Packages.props" />
+        <File Path="Launcher.props" />
+        <File Path="LICENSE" />
+        <File Path="Readme.md" />
+    </Folder>
+    <Folder Name="/Solution Items/Build Scripts/">
+        <File Path="download_net_runtime.py" />
+        <File Path="publish.sh" />
+        <File Path="publish_linux.sh" />
+        <File Path="publish_osx.sh" />
+        <File Path="publish_windows.sh" />
+    </Folder>
+    <Folder Name="/Solution Items/Workflows/">
+        <File Path=".github/workflows/build-test.yml" />
+        <File Path=".github/workflows/publish-release.yml" />
+    </Folder>
+    <Project Path="Marsey.Tests/Marsey.Tests.csproj" />
+    <Project Path="Marsey/Marsey.csproj" />
+    <Project Path="SS14.Launcher.Strap/SS14.Launcher.Strap.csproj" />
+    <Project Path="SS14.Launcher.Tests/SS14.Launcher.Tests.csproj" />
+    <Project Path="SS14.Launcher/SS14.Launcher.csproj" />
+    <Project Path="SS14.Loader/SS14.Loader.csproj" />
+    <Project Path="Robust.LoaderApi/Robust.LoaderApi/Robust.LoaderApi.csproj" />
 </Solution>
