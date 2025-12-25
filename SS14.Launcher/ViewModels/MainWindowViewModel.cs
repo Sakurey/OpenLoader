@@ -49,8 +49,6 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
     public PatchesTabViewModel PatchesTab { get; }
     public OptionsTabViewModel OptionsTab { get; }
 
-    public ToolsTabViewModel ToolsTab { get; }
-
     public MainWindowViewModel()
     {
         _cfg = Locator.Current.GetRequiredService<DataManager>();
@@ -67,7 +65,6 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         HomeTab = new HomePageViewModel(this);
         PatchesTab = new PatchesTabViewModel();
         OptionsTab = new OptionsTabViewModel();
-        ToolsTab = new ToolsTabViewModel(_authApi);
 
         var tabs = new List<MainWindowTabViewModel>();
         tabs.Add(HomeTab);
@@ -75,7 +72,6 @@ public sealed class MainWindowViewModel : ViewModelBase, IErrorOverlayOwner
         tabs.Add(NewsTab);
         tabs.Add(PatchesTab);
         tabs.Add(OptionsTab);
-        tabs.Add(ToolsTab);
 #if DEVELOPMENT
         tabs.Add(new DevelopmentTabViewModel());
 #endif
