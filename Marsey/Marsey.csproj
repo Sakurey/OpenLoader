@@ -11,7 +11,7 @@
 
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" />
-        <PackageReference Include="Lib.Harmony.Thin" />
+        <PackageReference Include="Lib.Harmony" />
         <PackageReference Include="MonoMod.Core" />
         <PackageReference Include="Newtonsoft.Json" />
     </ItemGroup>
