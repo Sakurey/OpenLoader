@@ -27,7 +27,6 @@
   </Folder>
   <Project Path="Marsey.Tests/Marsey.Tests.csproj" />
   <Project Path="Marsey/Marsey.csproj" />
-  <Project Path="Robust.LoaderApi/Robust.LoaderApi/Robust.LoaderApi.csproj" />
   <Project Path="SS14.Launcher.Strap/SS14.Launcher.Strap.csproj" />
   <Project Path="SS14.Launcher.Tests/SS14.Launcher.Tests.csproj" />
   <Project Path="SS14.Launcher/SS14.Launcher.csproj" />
