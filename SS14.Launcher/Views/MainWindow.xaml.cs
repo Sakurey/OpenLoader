@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using SS14.Launcher.ViewModels;
-using TerraFX.Interop.Windows;
 using IDataObject = Avalonia.Input.IDataObject;
 
 namespace SS14.Launcher.Views;
@@ -59,15 +59,33 @@ public partial class MainWindow : Window
             return;
         }
 
-        var hWnd = (HWND)handle.Handle;
+        var hWnd = handle.Handle;
 
-        COLORREF r = 0x00262121;
-        Windows.DwmSetWindowAttribute(hWnd, 35, &r, (uint) sizeof(COLORREF));
+        // Win11: DWMWA_CAPTION_COLOR = 35
+        // COLORREF is 0x00BBGGRR
+        var captionColor = unchecked((int)0x00262121);
+        _ = Win32.DwmSetWindowAttribute(hWnd, Win32.DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
 
         // Remove top margin of the window on Windows 11, since there's ample space after we recolor the title bar.
         var margin = HeaderPanel.Margin;
         HeaderPanel.Margin = new Thickness(margin.Left, 0, margin.Right, margin.Bottom);
     }
+
+    // ... existing code ...
+
+    private static class Win32
+    {
+        public const int DWMWA_CAPTION_COLOR = 35;
+
+        [DllImport("dwmapi.dll", ExactSpelling = true)]
+        public static extern int DwmSetWindowAttribute(
+            IntPtr hwnd,
+            int dwAttribute,
+            ref int pvAttribute,
+            int cbAttribute);
+    }
+
+    // ... existing code ...
 
     private void Drop(object? sender, DragEventArgs args)
     {

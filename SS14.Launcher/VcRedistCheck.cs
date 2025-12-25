@@ -35,7 +35,8 @@ public static class VcRedistCheck
             }
         }
 
-        if (ret == Windows.IDYES)
+        const int IdYes = 6; // Win32: IDYES
+        if (ret == IdYes)
         {
             Process.Start(new ProcessStartInfo
                 {

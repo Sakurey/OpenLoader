@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Mono.Unix;
-using TerraFX.Interop.Windows;
+using System.Runtime.InteropServices;
 
 namespace SS14.Launcher;
 
@@ -138,32 +138,34 @@ public static class Helpers
 
         fixed (char* pPath = path)
         {
-            var handle = Windows.CreateFileW(
-                pPath, // Cast char* to ushort*
-                Windows.GENERIC_ALL,
-                FILE.FILE_SHARE_READ,
-                null,
-                OPEN.OPEN_EXISTING,
-                FILE.FILE_FLAG_BACKUP_SEMANTICS,
-                HANDLE.NULL);
+            var handle = Win32.CreateFileW(
+                pPath,
+                Win32.GENERIC_ALL,
+                Win32.FILE_SHARE_READ,
+                IntPtr.Zero,
+                Win32.OPEN_EXISTING,
+                Win32.FILE_FLAG_BACKUP_SEMANTICS,
+                IntPtr.Zero);
 
-            var lpBytesReturned = 0u;
-            var lpInBuffer = (short)Windows.COMPRESSION_FORMAT_DEFAULT;
+            if (handle == Win32.INVALID_HANDLE_VALUE)
+                return;
 
-            Windows.DeviceIoControl(
+            uint bytesReturned = 0;
+            short compressionFormat = Win32.COMPRESSION_FORMAT_DEFAULT;
+
+            Win32.DeviceIoControl(
                 handle,
-                FSCTL.FSCTL_SET_COMPRESSION,
-                &lpInBuffer,
-                sizeof(short),
+                Win32.FSCTL_SET_COMPRESSION,
+                &compressionFormat,
+                (uint)sizeof(short),
                 null,
                 0,
-                &lpBytesReturned,
-                null);
+                &bytesReturned,
+                IntPtr.Zero);
 
-            Windows.CloseHandle(handle);
+            Win32.CloseHandle(handle);
         }
     }
-
 
     public static void ChmodPlusX(string path)
     {
@@ -172,12 +174,53 @@ public static class Helpers
             FileAccessPermissions.UserExecute | FileAccessPermissions.GroupExecute |
             FileAccessPermissions.OtherExecute;
     }
+
     public static unsafe int MessageBoxHelper(string text, string caption, uint type)
     {
         fixed (char* pText = text)
         fixed (char* pCaption = caption)
         {
-            return Windows.MessageBoxW(HWND.NULL, pText, pCaption, type);
+            return Win32.MessageBoxW(IntPtr.Zero, pText, pCaption, type);
         }
+    }
+
+    private static class Win32
+    {
+        public static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+
+        public const uint GENERIC_ALL = 0x10000000;
+        public const uint FILE_SHARE_READ = 0x00000001;
+        public const uint OPEN_EXISTING = 3;
+        public const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
+
+        public const uint FSCTL_SET_COMPRESSION = 0x0009C040;
+        public const short COMPRESSION_FORMAT_DEFAULT = 1;
+
+        [DllImport("kernel32.dll", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern unsafe IntPtr CreateFileW(
+            char* lpFileName,
+            uint dwDesiredAccess,
+            uint dwShareMode,
+            IntPtr lpSecurityAttributes,
+            uint dwCreationDisposition,
+            uint dwFlagsAndAttributes,
+            IntPtr hTemplateFile);
+
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        public static extern unsafe int DeviceIoControl(
+            IntPtr hDevice,
+            uint dwIoControlCode,
+            void* lpInBuffer,
+            uint nInBufferSize,
+            void* lpOutBuffer,
+            uint nOutBufferSize,
+            uint* lpBytesReturned,
+            IntPtr lpOverlapped);
+
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        public static extern int CloseHandle(IntPtr hObject);
+
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern unsafe int MessageBoxW(IntPtr hWnd, char* lpText, char* lpCaption, uint uType);
     }
 }

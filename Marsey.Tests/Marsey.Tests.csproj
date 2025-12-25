@@ -13,8 +13,14 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="NUnit"/>
         <PackageReference Include="NUnit3TestAdapter"/>
-        <PackageReference Include="NUnit.Analyzers"/>
-        <PackageReference Include="coverlet.collector"/>
+        <PackageReference Include="NUnit.Analyzers">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
@@ -23,6 +29,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Marsey\Marsey.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageVersion Update="NUnit" Version="4.4.0" />
     </ItemGroup>
 
 </Project>
