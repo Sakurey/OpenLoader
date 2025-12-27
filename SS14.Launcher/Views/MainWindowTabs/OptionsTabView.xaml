@@ -129,14 +129,6 @@
                  <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Content="Generate random" Command="{Binding GenHWIdCommand}" VerticalAlignment="Center" Margin="4"/>
              </Grid>
 
-             <CheckBox VerticalAlignment="Center" Margin="4" IsVisible="{Binding ForcingHWID}" IsChecked="{Binding AutoDeleteHWID}">Autodelete HWID</CheckBox>
-             <StackPanel IsVisible="{Binding ForcingHWID}" Margin="8">
-                 <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
-                            Text="Automatically deletes HWID and HWID2 from registry before connecting to server."/>
-                 <TextBlock VerticalAlignment="Center" FontWeight="Bold" TextWrapping="Wrap"
-                            Text="Deletes values from HKEY_CURRENT_USER\Software\Space Wizards\Robust"/>
-             </StackPanel>
-
              <TextBlock Margin="4, 0" Text="Patching" Classes="NanoHeadingMedium" />
              <CheckBox VerticalAlignment="Center" Margin="4" IsChecked="{Binding ThrowPatchFail}">Except On Patch Fail</CheckBox>
              <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"

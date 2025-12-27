@@ -609,7 +609,6 @@ public class Connector : ReactiveObject
             { "MARSEY_PRESENCE_USERNAME", _cfg.GetCVar(CVars.RPCUsername) },
             { "MARSEY_FORCINGHWID", _cfg.GetCVar(CVars.ForcingHWId) ? "true" : null },
             { "MARSEY_FORCEDHWID", _cfg.GetCVar(CVars.ForcingHWId) ? MarseyGetHWID() : null },
-            { "MARSEY_AUTODELETE_HWID", _cfg.GetCVar(CVars.AutoDeleteHWID) ? "true" : null },
             { "MARSEY_FORKID", _forkid },
             { "MARSEY_ENGINE", _engine },
             { "MARSEY_BACKPORTS", _cfg.GetCVar(CVars.Backports) ? "true" : null },

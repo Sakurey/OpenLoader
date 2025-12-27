@@ -303,17 +303,6 @@ public class OptionsTabViewModel : MainWindowTabViewModel, INotifyPropertyChange
             Cfg.CommitConfig();
         }
     }
-
-    public bool AutoDeleteHWID
-    {
-        get => Cfg.GetCVar(CVars.AutoDeleteHWID);
-        set
-        {
-            Cfg.SetCVar(CVars.AutoDeleteHWID, value);
-            Cfg.CommitConfig();
-        }
-    }
-
     private void SetTempHwid()
     {
         PrepareHwidForLaunch();

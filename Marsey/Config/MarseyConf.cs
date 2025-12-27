@@ -80,11 +80,6 @@ public static class MarseyConf
     public static bool Patchless;
 
     /// <summary>
-    /// Automatically delete HWID from registry before connecting
-    /// </summary>
-    public static bool AutoDeleteHWID;
-
-    /// <summary>
     /// Reflect changes made here to the Dictionary in the launcher's Connector.cs
     /// </summary>
     public static readonly Dictionary<string, Action<string>> EnvVarMap = new Dictionary<string, Action<string>>
@@ -97,7 +92,6 @@ public static class MarseyConf
         { "MARSEY_DISABLE_STRICT", value => DisableResPackStrict = value == "true" },
         { "MARSEY_FORCINGHWID", value => ForceHWID = value == "true" },
         { "MARSEY_FORCEDHWID", value => HWID.SetHWID(value)},
-        { "MARSEY_AUTODELETE_HWID", value => AutoDeleteHWID = value == "true" },
         { "MARSEY_DISABLE_PRESENCE", value => KillRPC = value == "true" },
         { "MARSEY_FAKE_PRESENCE", value => FakeRPC = value == "true"},
         { "MARSEY_PRESENCE_USERNAME", value => DiscordRPC.SetUsername(value)},

@@ -212,11 +212,6 @@ public static class CVars
     // HWID
 
     /// <summary>
-    /// Do we automatically delete HWID from registry before connecting?
-    /// </summary>
-    public static readonly CVarDef<bool> AutoDeleteHWID = CVarDef.Create("AutoDeleteHWID", false);
-
-    /// <summary>
     /// HWId to use on servers
     /// </summary>
     public static readonly CVarDef<string> ForcedHWId = CVarDef.Create("ForcedHWId", "");
