@@ -240,7 +240,7 @@ public sealed class DataManager : ReactiveObject
             // Generate a fingerprint and immediately save it to disk.
             //SetCVar(CVars.Fingerprint, Guid.NewGuid().ToString());
         //}
-
+        EnsureHwids();
         CommitConfig();
     }
 
@@ -594,6 +594,26 @@ public sealed class DataManager : ReactiveObject
         public bool Contains(Hub item) => _parent._hubs.Contains(item);
         public int Count => _parent._hubs.Count;
         public bool IsReadOnly => false;
+    }
+
+    public void EnsureHwids()
+    {
+        bool changed = false;
+        foreach (var login in _logins.Items)
+        {
+            if (string.IsNullOrEmpty(login.HWID))
+            {
+                login.HWID = Marsey.Game.Patches.HWID.GenerateRandom();
+                this.ChangeLogin(ChangeReason.Update, login);
+                changed = true;
+                Log.Information("Auto-assigned HWID to {User}", login.Username);
+            }
+        }
+
+        if (changed)
+        {
+            this.CommitConfig();
+        }
     }
 }
 
