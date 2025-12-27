@@ -479,6 +479,14 @@ public class OptionsTabViewModel : MainWindowTabViewModel, INotifyPropertyChange
         if (HWID.CheckHWID(_hwidString))
         {
             HWIDTextBoxBorderBrush = new SolidColorBrush(Color.Parse("#FF888888"));
+
+            var account = _loginManager.ActiveAccount;
+            if (LIHWIDBind && account != null)
+            {
+                account.LoginInfo.HWID = _hwidString;
+                _dataManager.ChangeLogin(ChangeReason.Update, account.LoginInfo);
+                Log.Information("Manually bound HWID to account {User}: {Hwid}", account.Username, _hwidString);
+            }
             Cfg.CommitConfig();
         }
         else
@@ -499,7 +507,6 @@ public class OptionsTabViewModel : MainWindowTabViewModel, INotifyPropertyChange
     {
         string hwid = HWID.GenerateRandom();
         HWIdString = hwid;
-
         OnSetHWIdClick();
     }
 

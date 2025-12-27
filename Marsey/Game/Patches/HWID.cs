@@ -106,9 +106,12 @@ public static class HWID
 
     private static void RecalcHwid(ref byte[] __result)
     {
-        string hwidString = BitConverter.ToString(_hwId).Replace("-", "");
-        MarseyLogger.Log(MarseyLogger.LogType.DEBG, "HWIDForcer", $"\"Recalculating\" HWID to {hwidString}");
-        __result = _hwId;
+        if (OperatingSystem.IsWindows())
+        {
+            string hwidString = BitConverter.ToString(_hwId).Replace("-", "");
+            MarseyLogger.Log(MarseyLogger.LogType.DEBG, "HWIDForcer", $"\"Recalculating\" HWID to {hwidString}");
+            __result = _hwId;
+        }
     }
 
     private static void RecalcHwid2(ref byte[] __result)
