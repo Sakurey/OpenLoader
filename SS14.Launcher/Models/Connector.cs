@@ -609,6 +609,7 @@ public class Connector : ReactiveObject
             { "MARSEY_PRESENCE_USERNAME", _cfg.GetCVar(CVars.RPCUsername) },
             { "MARSEY_FORCINGHWID", _cfg.GetCVar(CVars.ForcingHWId) ? "true" : null },
             { "MARSEY_FORCEDHWID", _cfg.GetCVar(CVars.ForcingHWId) ? MarseyGetHWID() : null },
+            { "MARSEY_FORCEDHWID_LEGACY", _cfg.GetCVar(CVars.ForcingHWId) ? MarseyGetLegacyHWID() : null },
             { "MARSEY_FORKID", _forkid },
             { "MARSEY_ENGINE", _engine },
             { "MARSEY_BACKPORTS", _cfg.GetCVar(CVars.Backports) ? "true" : null },
@@ -623,6 +624,14 @@ public class Connector : ReactiveObject
 
         SendConfig(serializedEnvVars);
     }
+    private string MarseyGetLegacyHWID()
+    {
+        if (_cfg.GetCVar(CVars.LIHWIDBind) && _loginManager.ActiveAccount != null)
+        {
+            return _loginManager.ActiveAccount.LoginInfo.LegacyHWId;
+        }
+        return HWID.GenerateRandom(); // Или дефолт
+    }
 
     private async Task SendConfig(string config)
     {
@@ -633,9 +642,9 @@ public class Connector : ReactiveObject
     private string MarseyGetHWID()
     {
         string forcedHWID = _cfg.GetCVar(CVars.ForcedHWId);
-        if (_cfg.GetCVar(CVars.LIHWIDBind))
+        if (_cfg.GetCVar(CVars.LIHWIDBind) && _loginManager.ActiveAccount != null)
         {
-            forcedHWID = _loginManager.ActiveAccount!.LoginInfo.HWID;
+            forcedHWID = _loginManager.ActiveAccount.LoginInfo.ModernHWId;
         }
 
         Log.Debug($"Exiting with {forcedHWID}");

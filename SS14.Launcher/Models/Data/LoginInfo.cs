@@ -13,7 +13,9 @@ public class LoginInfo : ReactiveObject
     [Reactive]
     public LoginToken Token { get; set; }
     [Reactive]
-    public string HWID { get; set; } = ""; // Empty by default
+    public string ModernHWId { get; set; } = "";
+    [Reactive]
+    public string LegacyHWId { get; set; } = "";
 
     public override string ToString()
     {

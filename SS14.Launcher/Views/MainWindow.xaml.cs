@@ -71,8 +71,6 @@ public partial class MainWindow : Window
         HeaderPanel.Margin = new Thickness(margin.Left, 0, margin.Right, margin.Bottom);
     }
 
-    // ... existing code ...
-
     private static class Win32
     {
         public const int DWMWA_CAPTION_COLOR = 35;
@@ -84,8 +82,6 @@ public partial class MainWindow : Window
             ref int pvAttribute,
             int cbAttribute);
     }
-
-    // ... existing code ...
 
     private void Drop(object? sender, DragEventArgs args)
     {

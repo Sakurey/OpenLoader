@@ -8,12 +8,20 @@ using Marsey.Stealthsey;
 
 namespace Marsey.Game.Patches;
 
+/*
+ *ВНИМАНИЕ!!!
+ *ДАННАЯ СИСТЕМА ЗАСТАВЛЯЕТ ЧЕЛТИ НЫТЬ В ХУЙ
+ *ТАК ЖЕ В ЭТОТ МОМЕНТ ВАМ НАЧИНАЕТ ДРОЧИТЬ ЕГО ПАРЕНЬ НЮКЛИР
+ *ВНИМАНИЕ!!!
+*/
+
 /// <summary>
 /// Manages HWId variable given to the game.
 /// </summary>
 public static class HWID
 {
     private static byte[] _hwId = Array.Empty<byte>();
+    private static byte[] _hwId2 = Array.Empty<byte>();
     private static string _hwidString = "";
 
     /// <summary>
@@ -21,24 +29,39 @@ public static class HWID
     /// </summary>
     public static void Force()
     {
-        bool hasValidHwid = !string.IsNullOrEmpty(_hwidString) && CheckHWID(_hwidString);
-
-        if (!MarseyConf.ForceHWID && !hasValidHwid)
+        if (!MarseyConf.ForceHWID)
         {
-            MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", "No custom HWID provided and Force is disabled. Using real hardware ID.");
+            MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", "Spoofer disabled.");
             return;
         }
 
-        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"Applying custom HWID: {_hwidString}");
+        bool hasValidHwid = !string.IsNullOrEmpty(_hwidString) && CheckHWID(_hwidString);
 
-        string cleanedHwid = CleanHwid(_hwidString);
-        ForceHWID(cleanedHwid);
+        if (!hasValidHwid)
+        {
+            MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", "Generating random HWID...");
+            SetHWID(GenerateRandom(), GenerateRandom());
+        }
+
         PatchCalcMethod();
     }
 
-    public static void SetHWID(string hwid)
+    public static void SetModern(string value)
     {
-        _hwidString = hwid;
+        _hwidString = value;
+        _hwId2 = ConvertToBytes(value);
+    }
+
+    public static void SetLegacy(string value)
+    {
+        _hwId = ConvertToBytes(value);
+    }
+
+    public static void SetHWID(string modern, string legacy)
+    {
+        _hwidString = modern;
+        SetModern(modern);
+        SetLegacy(legacy);
     }
 
     private static string CleanHwid(string hwid)
@@ -46,19 +69,15 @@ public static class HWID
         return new string(hwid.Where(c => "0123456789ABCDEF".Contains(c)).ToArray());
     }
 
-    private static void ForceHWID(string cleanedHwid)
+    private static byte[] ConvertToBytes(string hex)
     {
-        try
-        {
-            _hwId = Enumerable.Range(0, cleanedHwid.Length / 2)
-                              .Select(x => Convert.ToByte(cleanedHwid.Substring(x * 2, 2), 16))
-                              .ToArray();
-        }
-        catch (FormatException ex)
-        {
-            MarseyLogger.Log(MarseyLogger.LogType.INFO, $"Invalid HWID format, must be hexadecimal: {ex.Message}.\nSetting to null.");
-            _hwId = Array.Empty<byte>();
-        }
+        string cleaned = CleanHwid(hex);
+        if (cleaned.Length == 0)
+            return Array.Empty<byte>();
+
+        return Enumerable.Range(0, cleaned.Length / 2)
+                          .Select(x => Convert.ToByte(cleaned.Substring(x * 2, 2), 16))
+                          .ToArray();
     }
 
     public static string GenerateRandom(int length = 64)
@@ -77,12 +96,41 @@ public static class HWID
 
     private static void PatchCalcMethod()
     {
-        Type? hwid = Helpers.TypeFromQualifiedName("Robust.Client.Hwid.BasicHwid");
+        Type? basicHwid = Helpers.TypeFromQualifiedName("Robust.Client.HWId.BasicHWId");
+        Type? dummyHwid = Helpers.TypeFromQualifiedName("Robust.Shared.Network.DummyHWId");
 
-        if (hwid is not null)
+        if (basicHwid is null && dummyHwid is null)
+        {
+            MarseyLogger.Log(MarseyLogger.LogType.ERRO, "HWIDForcer", "No HWID types found!");
+            return;
+        }
+
+        if (basicHwid is not null)
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                Helpers.PatchMethod(
+                    basicHwid,
+                    "GetLegacy",
+                    typeof(HWID),
+                    nameof(RecalcHwid),
+                    HarmonyPatchType.Postfix
+                );
+            }
+
+            Helpers.PatchMethod(
+                basicHwid,
+                "GetModern",
+                typeof(HWID),
+                nameof(RecalcHwid2),
+                HarmonyPatchType.Postfix
+            );
+        }
+
+        if (dummyHwid is not null)
         {
             Helpers.PatchMethod(
-                hwid,
+                dummyHwid,
                 "GetLegacy",
                 typeof(HWID),
                 nameof(RecalcHwid),
@@ -90,7 +138,7 @@ public static class HWID
             );
 
             Helpers.PatchMethod(
-                hwid,
+                dummyHwid,
                 "GetModern",
                 typeof(HWID),
                 nameof(RecalcHwid2),
@@ -106,18 +154,29 @@ public static class HWID
 
     private static void RecalcHwid(ref byte[] __result)
     {
-        if (OperatingSystem.IsWindows())
-        {
-            string hwidString = BitConverter.ToString(_hwId).Replace("-", "");
-            MarseyLogger.Log(MarseyLogger.LogType.DEBG, "HWIDForcer", $"\"Recalculating\" HWID to {hwidString}");
-            __result = _hwId;
-        }
+        if (_hwId.Length == 0)
+            return;
+
+        string original = BitConverter.ToString(__result).Replace("-", "");
+        string applied = BitConverter.ToString(_hwId).Replace("-", "");
+
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[LEGACY] Original: {original}");
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[LEGACY] Applied: {applied}");
+
+        __result = _hwId;
     }
 
     private static void RecalcHwid2(ref byte[] __result)
     {
-        string hwidString = BitConverter.ToString(_hwId).Replace("-", "");
-        MarseyLogger.Log(MarseyLogger.LogType.DEBG, "HWIDForcer", $"\"Recalculating\" HWID to {hwidString}");
-        __result = [0, .._hwId];
+        if (_hwId2.Length == 0)
+            return;
+
+        string original = BitConverter.ToString(__result).Replace("-", "");
+        string applied = BitConverter.ToString(_hwId2).Replace("-", "");
+
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[MODERN] Original: {original}");
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[MODERN] Applied: {applied}");
+
+        __result = [0, .._hwId2];
     }
 }

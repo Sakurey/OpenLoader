@@ -248,34 +248,21 @@ internal static class Program
 
         _designTimeServicesRegistered = true;
 
-        try
-        {
-            var locator = Locator.CurrentMutable;
+        var locator = Locator.CurrentMutable;
 
-            // Минимальный набор: то, что обычно дергают VM/utility через Locator.
-            locator.RegisterConstant(new LauncherMessaging());
+        locator.RegisterConstant(new LauncherMessaging());
 
-            // Важно: НЕ вызываем cfg.Load() в дизайнере (может лезть на диск/в окружение).
-            var cfg = new DataManager();
-            locator.RegisterConstant(cfg);
+        var cfg = new DataManager();
+        locator.RegisterConstant(cfg);
 
-            // HttpClient сам по себе безвреден для дизайнера (пока вы не делаете запросы).
-            var http = new HttpClient();
-            locator.RegisterConstant(http);
+        var http = new HttpClient();
+        locator.RegisterConstant(http);
 
-            // Если HubSettingsViewModel требует HubApi/другие API через DI — добавляем и их.
-            var authApi = new AuthApi(http);
-            locator.RegisterConstant(authApi);
-            locator.RegisterConstant(new HubApi(http));
+        var authApi = new AuthApi(http);
+        locator.RegisterConstant(authApi);
+        locator.RegisterConstant(new HubApi(http));
 
-            // Добавляем LoginManager, который требуется для MainWindowLoginViewModel
-            locator.RegisterConstant(new LoginManager(cfg, authApi));
-        }
-        catch
-        {
-            // Дизайнер не должен падать из-за design-time DI.
-            // Если что-то не получилось зарегистрировать — лучше пусть превью будет "пустым", чем IDE падает.
-        }
+        locator.RegisterConstant(new LoginManager(cfg, authApi));
     }
 
     // Runtime-only configuration with DI/services.

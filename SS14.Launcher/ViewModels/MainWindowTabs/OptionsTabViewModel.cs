@@ -313,7 +313,8 @@ public class OptionsTabViewModel : MainWindowTabViewModel, INotifyPropertyChange
             return;
         }
 
-        _hwidString = _loginManager.ActiveAccount != null ? _loginManager.ActiveAccount.LoginInfo.HWID : "";
+        // Заменяем .HWID на .ModernHWId (или .LegacyHWId, смотря что хочешь видеть в UI)
+        _hwidString = _loginManager.ActiveAccount != null ? _loginManager.ActiveAccount.LoginInfo.ModernHWId : "";
     }
 
     private void SetTempGuestUsername()
@@ -324,19 +325,34 @@ public class OptionsTabViewModel : MainWindowTabViewModel, INotifyPropertyChange
     {
         var account = _loginManager.ActiveAccount;
         if (account == null) return;
-        if (string.IsNullOrEmpty(account.LoginInfo.HWID))
+
+        bool changed = false;
+
+        if (string.IsNullOrEmpty(account.LoginInfo.ModernHWId))
+        {
+            account.LoginInfo.ModernHWId = HWID.GenerateRandom();
+            changed = true;
+        }
+        if (string.IsNullOrEmpty(account.LoginInfo.LegacyHWId))
         {
             string newHwid = HWID.GenerateRandom();
-            account.LoginInfo.HWID = newHwid;
+            account.LoginInfo.LegacyHWId = newHwid;
             _dataManager.ChangeLogin(ChangeReason.Update, account.LoginInfo);
             _dataManager.CommitConfig();
 
-            Log.Information("Bound new HWID to account {User}: {Hwid}", account.Username, newHwid);
+            Log.Information("Bound new Legacy HWID to account {User}: {Hwid}", account.Username, newHwid);
+        }
+
+        if (changed)
+        {
+            _dataManager.ChangeLogin(ChangeReason.Update, account.LoginInfo);
+            _dataManager.CommitConfig();
+            Log.Information("Generated new unique HWIDs for account {User}", account.Username);
         }
 
         if (LIHWIDBind)
         {
-            HWID.SetHWID(account.LoginInfo.HWID);
+            HWID.SetHWID(account.LoginInfo.ModernHWId, account.LoginInfo.LegacyHWId);
         }
     }
 
@@ -483,9 +499,14 @@ public class OptionsTabViewModel : MainWindowTabViewModel, INotifyPropertyChange
             var account = _loginManager.ActiveAccount;
             if (LIHWIDBind && account != null)
             {
-                account.LoginInfo.HWID = _hwidString;
+                account.LoginInfo.ModernHWId = _hwidString;
+                if (string.IsNullOrEmpty(account.LoginInfo.LegacyHWId) || account.LoginInfo.LegacyHWId == _hwidString)
+                {
+                    account.LoginInfo.LegacyHWId = HWID.GenerateRandom();
+                }
+
                 _dataManager.ChangeLogin(ChangeReason.Update, account.LoginInfo);
-                Log.Information("Manually bound HWID to account {User}: {Hwid}", account.Username, _hwidString);
+                Log.Information("Manually bound unique HWIDs to account {User}", account.Username);
             }
             Cfg.CommitConfig();
         }

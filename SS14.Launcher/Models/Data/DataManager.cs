@@ -248,14 +248,15 @@ public sealed class DataManager : ReactiveObject
     {
         // Load logins.
         _logins.AddOrUpdate(
-            sqliteConnection.Query<(Guid id, string name, string token, string? hwid, DateTimeOffset expires)>(
-                    "SELECT UserId, UserName, Token, HWID, Expires FROM Login")
+            sqliteConnection.Query<(Guid id, string name, string token, string? modernhwid, string? legacyhwid, DateTimeOffset expires)>(
+                    "SELECT UserId, UserName, Token, ModernHWId, LegacyHWId, Expires FROM Login")
                 .Select(l => new LoginInfo
                 {
                     UserId = l.id,
                     Username = l.name,
                     Token = new LoginToken(l.token, l.expires),
-                    HWID = l.hwid ?? ""
+                    ModernHWId = l.modernhwid ?? "",
+                    LegacyHWId = l.legacyhwid ?? ""
                 }));
 
         // Favorites
@@ -404,17 +405,18 @@ public sealed class DataManager : ReactiveObject
         {
             login.UserId,
             UserName = login.Username,
-            login.Token.Token,
+            Token = login.Token.Token,
             Expires = login.Token.ExpireTime,
-            login.HWID
+            login.ModernHWId,
+            login.LegacyHWId
         };
         AddDbCommand(con =>
         {
             con.Execute(reason switch
                 {
-                    ChangeReason.Add => "INSERT INTO Login (UserId, UserName, Token, Expires, HWID) VALUES (@UserId, @UserName, @Token, @Expires, @HWID)",
+                    ChangeReason.Add => "INSERT INTO Login (UserId, UserName, Token, Expires, ModernHWId, LegacyHWId) VALUES (@UserId, @UserName, @Token, @Expires, @ModernHWId, @LegacyHWId)",
                     ChangeReason.Update =>
-                        "UPDATE Login SET UserName = @UserName, Token = @Token, Expires = @Expires, HWID = @HWID WHERE UserId = @UserId",
+                        "UPDATE Login SET UserName = @UserName, Token = @Token, Expires = @Expires, ModernHWId = @ModernHWId, LegacyHWId = @LegacyHWId WHERE UserId = @UserId",
                     ChangeReason.Remove => "DELETE FROM Login WHERE UserId = @UserId",
                     _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
                 },
@@ -598,19 +600,29 @@ public sealed class DataManager : ReactiveObject
 
     public void EnsureHwids()
     {
-        bool changed = false;
+        bool anyChanged = false;
         foreach (var login in _logins.Items)
         {
-            if (string.IsNullOrEmpty(login.HWID))
+            bool userChanged = false;
+            if (string.IsNullOrEmpty(login.ModernHWId))
             {
-                login.HWID = Marsey.Game.Patches.HWID.GenerateRandom();
+                login.ModernHWId = Marsey.Game.Patches.HWID.GenerateRandom();
+                userChanged = true;
+            }
+            if (string.IsNullOrEmpty(login.LegacyHWId))
+            {
+                login.LegacyHWId = Marsey.Game.Patches.HWID.GenerateRandom();
+                userChanged = true;
+            }
+
+            if (userChanged)
+            {
                 this.ChangeLogin(ChangeReason.Update, login);
-                changed = true;
-                Log.Information("Auto-assigned HWID to {User}", login.Username);
+                Log.Information("Auto-assigned unique HWIDs to {User}", login.Username);
+                anyChanged = true;
             }
         }
-
-        if (changed)
+        if (anyChanged)
         {
             this.CommitConfig();
         }

@@ -3,7 +3,8 @@
     UserName TEXT NOT NULL,
     Token TEXT NOT NULL,
     Expires DATETIME NOT NULL,
-    HWID TEXT
+    ModernHWId TEXT,
+    LegacyHWId TEXT
 );
 
 CREATE TABLE Config (
