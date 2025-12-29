@@ -129,14 +129,16 @@ public static class HWID
 
         if (dummyHwid is not null)
         {
-            Helpers.PatchMethod(
-                dummyHwid,
-                "GetLegacy",
-                typeof(HWID),
-                nameof(RecalcHwid),
-                HarmonyPatchType.Postfix
-            );
-
+            if (OperatingSystem.IsWindows())
+            {
+                Helpers.PatchMethod(
+                    dummyHwid,
+                    "GetLegacy",
+                    typeof(HWID),
+                    nameof(RecalcHwid),
+                    HarmonyPatchType.Postfix
+                );
+            }
             Helpers.PatchMethod(
                 dummyHwid,
                 "GetModern",
