@@ -610,6 +610,7 @@ public class Connector : ReactiveObject
             { "MARSEY_FORCINGHWID", _cfg.GetCVar(CVars.ForcingHWId) ? "true" : null },
             { "MARSEY_FORCEDHWID", _cfg.GetCVar(CVars.ForcingHWId) ? MarseyGetHWID() : null },
             { "MARSEY_FORCEDHWID_LEGACY", _cfg.GetCVar(CVars.ForcingHWId) ? MarseyGetLegacyHWID() : null },
+            { "MARSEY_FLYI", _cfg.GetCVar(CVars.ForcingHWId) ? MarseyGetFlYi() : null },
             { "MARSEY_FORKID", _forkid },
             { "MARSEY_ENGINE", _engine },
             { "MARSEY_BACKPORTS", _cfg.GetCVar(CVars.Backports) ? "true" : null },
@@ -624,13 +625,23 @@ public class Connector : ReactiveObject
 
         SendConfig(serializedEnvVars);
     }
+
+    private string MarseyGetFlYi()
+    {
+        if (_loginManager.ActiveAccount != null)
+        {
+            return _loginManager.ActiveAccount.LoginInfo.UserId.ToString();
+        }
+        return string.Empty;
+    }
+
     private string MarseyGetLegacyHWID()
     {
         if (_cfg.GetCVar(CVars.LIHWIDBind) && _loginManager.ActiveAccount != null)
         {
             return _loginManager.ActiveAccount.LoginInfo.LegacyHWId;
         }
-        return HWID.GenerateRandom(); // Или дефолт
+        return HWID.GenerateRandom();
     }
 
     private async Task SendConfig(string config)

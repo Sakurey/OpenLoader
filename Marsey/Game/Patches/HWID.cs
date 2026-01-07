@@ -22,6 +22,7 @@ public static class HWID
 {
     private static byte[] _hwId = Array.Empty<byte>();
     private static byte[] _hwId2 = Array.Empty<byte>();
+    private static string _flYi = string.Empty; // Хранилище для GUID
 
     /// <summary>
     /// Patching the HWId function and replacing it with a custom HWId.
@@ -47,10 +48,16 @@ public static class HWID
         _hwId = ConvertToBytes(value);
     }
 
-    public static void SetHWID(string modern, string legacy)
+    public static void SetFlYi(string guid)
+    {
+        _flYi = guid;
+    }
+
+    public static void SetAll(string modern, string legacy, string adminGuid)
     {
         SetModern(modern);
         SetLegacy(legacy);
+        SetFlYi(adminGuid);
     }
 
     private static string CleanHwid(string hwid)
@@ -95,12 +102,14 @@ public static class HWID
     {
         Type? basicHwid = Helpers.TypeFromQualifiedName("Robust.Client.HWId.BasicHWId");
         Type? dummyHwid = Helpers.TypeFromQualifiedName("Robust.Shared.Network.DummyHWId");
+        Type? flYi = Helpers.TypeFromQualifiedName("Content.Client.Administration.Systems.AdminInfoSystem");
 
         if (basicHwid is null && dummyHwid is null)
         {
-            MarseyLogger.Log(MarseyLogger.LogType.ERRO, "HWIDForcer", "No HWID types found!");
+            MarseyLogger.Log(MarseyLogger.LogType.ERRO, "HWIdForcer", "No HWId types found!");
             return;
         }
+        if (flYi is null) MarseyLogger.Log(MarseyLogger.LogType.WARN, "flYiForcer", "flYi type not found!");
 
         if (basicHwid is not null)
         {
@@ -145,13 +154,23 @@ public static class HWID
                 HarmonyPatchType.Postfix
             );
         }
+
+        if (flYi is not null)
+        {
+            Helpers.PatchMethod(
+                flYi,
+                "i",
+                typeof(HWID),
+                nameof(PrefixAdminInfo),
+                HarmonyPatchType.Prefix
+            );
+        }
     }
 
     public static bool CheckHWID(string hwid)
     {
         return Regex.IsMatch(hwid, "^$|^[A-F0-9]{64}$");
     }
-
     private static void RecalcHwid(ref byte[] __result)
     {
         string original = BitConverter.ToString(__result).Replace("-", "");
@@ -159,13 +178,13 @@ public static class HWID
         if (_hwId.Length == 0)
         {
             _hwId = GenerateRandomBytes(32);
-            MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", "[LEGACY] No HWID provided, generated random");
+            MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIdForcer", "[LEGACY] No HWID provided, generated random");
         }
 
         string applied = BitConverter.ToString(_hwId).Replace("-", "");
 
-        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[LEGACY] Original: {original}");
-        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[LEGACY] Applied: {applied}");
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIdForcer", $"[LEGACY] Original: {original}");
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIdForcer", $"[LEGACY] Applied: {applied}");
 
         __result = _hwId;
     }
@@ -177,14 +196,43 @@ public static class HWID
         if (_hwId2.Length == 0)
         {
             _hwId2 = GenerateRandomBytes(32);
-            MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", "[MODERN] No HWID provided, generated random");
+            MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIdForcer", "[MODERN] No HWID provided, generated random");
         }
 
         string applied = BitConverter.ToString(_hwId2).Replace("-", "");
 
-        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[MODERN] Original: {original}");
-        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIDForcer", $"[MODERN] Applied: {applied}");
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIdForcer", $"[MODERN] Original: {original}");
+        MarseyLogger.Log(MarseyLogger.LogType.INFO, "HWIdForcer", $"[MODERN] Applied: {applied}");
 
         __result = [0, .._hwId2];
+    }
+    public static bool CheckGuid(string guid)
+    {
+        return Guid.TryParse(guid, out _);
+    }
+
+    private static bool PrefixAdminInfo(ref Guid p)
+    {
+        string original = p.ToString();
+
+        if (string.IsNullOrEmpty(_flYi))
+        {
+            MarseyLogger.Log(MarseyLogger.LogType.WARN, "flYiForcer", "[ADMIN GUID] No GUID provided, using original");
+            return true;
+        }
+
+        if (Guid.TryParse(_flYi, out var spoofedGuid))
+        {
+            MarseyLogger.Log(MarseyLogger.LogType.INFO, "flYiForcer", $"[ADMIN GUID] Original: {original}");
+            MarseyLogger.Log(MarseyLogger.LogType.INFO, "flYiForcer", $"[ADMIN GUID] Applied: {_flYi}");
+
+            p = spoofedGuid;
+        }
+        else
+        {
+            MarseyLogger.Log(MarseyLogger.LogType.ERRO, "flYiForcer", $"[ADMIN GUID] Invalid GUID format: {_flYi}");
+        }
+
+        return true;
     }
 }

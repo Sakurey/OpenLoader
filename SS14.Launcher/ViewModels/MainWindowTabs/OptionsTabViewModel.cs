@@ -352,7 +352,19 @@ public class OptionsTabViewModel : MainWindowTabViewModel, INotifyPropertyChange
 
         if (LIHWIDBind)
         {
-            HWID.SetHWID(account.LoginInfo.ModernHWId, account.LoginInfo.LegacyHWId);
+            HWID.SetAll(
+                account.LoginInfo.ModernHWId,
+                account.LoginInfo.LegacyHWId,
+                account.LoginInfo.UserId.ToString()
+            );
+        }
+        else
+        {
+            HWID.SetAll(
+                Cfg.GetCVar(CVars.ForcedHWId),
+                Cfg.GetCVar(CVars.ForcedHWId),
+                account.LoginInfo.UserId.ToString()
+            );
         }
     }
 

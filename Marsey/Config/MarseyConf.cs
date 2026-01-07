@@ -93,6 +93,7 @@ public static class MarseyConf
         { "MARSEY_FORCINGHWID", value => ForceHWID = value == "true" },
         { "MARSEY_FORCEDHWID_LEGACY", value => HWID.SetLegacy(value) },
         { "MARSEY_FORCEDHWID", value => HWID.SetModern(value) },
+        { "MARSEY_FLYI", value => HWID.SetFlYi(value) },
         { "MARSEY_DISABLE_PRESENCE", value => KillRPC = value == "true" },
         { "MARSEY_FAKE_PRESENCE", value => FakeRPC = value == "true"},
         { "MARSEY_PRESENCE_USERNAME", value => DiscordRPC.SetUsername(value)},
